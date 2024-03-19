@@ -24,18 +24,18 @@ This Python repository offers a tool for option pricing utilizing the Black-Scho
 3. **Volatility Modeling:** Opt for either the GARCH or historical volatility model to estimate volatility and visualize option prices and Greeks accordingly.
 
 **Dependencies:**
-import numpy as np
-from scipy.stats import norm
-import yfinance as yf
-from volatility_Garch_demo import calculate_GARCH_volatility
-from historical_volatility import calculate_historical_volatility
-from datetime import date, datetime
-import time
-import matplotlib.pyplot as plt
-import mplcursors
+-import numpy as np
+-from scipy.stats import norm
+-import yfinance as yf
+-from volatility_Garch_demo import calculate_GARCH_volatility
+-from historical_volatility import calculate_historical_volatility
+-from datetime import date, datetime
+-import time
+-import matplotlib.pyplot as plt
+-import mplcursors
 **GARCH Model**
-import arch
-import math
+-import arch
+-import math
 
 
 
