@@ -43,5 +43,3 @@ This Python repository offers a tool for option pricing utilizing the Black-Scho
 
 Feel free to contribute, suggest enhancements, or report issues to improve the tool's functionality and usability!
 
----
-Adjustments can be made as per your project's specifications before uploading to GitHub.
