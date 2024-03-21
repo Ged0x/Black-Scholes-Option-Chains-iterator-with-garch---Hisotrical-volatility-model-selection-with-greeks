@@ -3,7 +3,6 @@ from scipy.stats import norm
 import yfinance as yf
 from volatility_Garch_demo import calculate_GARCH_volatility
 from historical_volatility import calculate_historical_volatility
-#from ticker import symbol
 from datetime import date, datetime
 import time
 import matplotlib.pyplot as plt
