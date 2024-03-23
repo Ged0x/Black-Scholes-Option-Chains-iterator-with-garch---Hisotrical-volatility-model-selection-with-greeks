@@ -1,4 +1,4 @@
-# Black-Scholes-Option-Chains-iterator-with-garch-Hisotrical-volatility-model-selection-with-greeks
+# Black-Scholes-Option-Chains-iterator-with-garch-Historical-volatility-model-selection-with-greeks
 **Option Pricing Tool:** Python script with Black-Scholes model for option pricing &amp; Greeks analysis. Choose GARCH/historical volatility. Interactive interface. (This project uses the vanilla Black-Scholes model) (The plotting of the graph of greeks is based on strike price and option price as test, feel free to plot in anyway you desire)
 
 
