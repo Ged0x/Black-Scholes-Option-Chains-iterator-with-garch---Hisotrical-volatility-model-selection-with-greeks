@@ -43,6 +43,17 @@ This Python repository offers a tool for option pricing utilizing the Black-Scho
 
 
 
+**GREEKS PARTIAL DERIVATIVES**
+
+- Delta : Measures the sensitivity of the option price to changes in the underlying asset price (S).
+- Theta : Measures the sensitivity of the option price to changes in time to expiration (T)
+- Gamma : Measures the rate of change of delta with respect to changes in the underlying asset price.
+- Vega :  Measures the sensitivity of the option price to changes in volatility (sigma)
+- Rho : Measures the sensitivity of the option price to changes in the risk-free interest rate (r)
+
+
+
+
 **Note:** This tool serves educational and informational purposes exclusively and does not constitute financial advice. Users must conduct thorough research and consult with financial experts before making investment decisions.
 
 Feel free to contribute, suggest enhancements, or report issues to improve the tool's functionality and usability!
