@@ -3,6 +3,7 @@ from scipy.stats import norm
 import yfinance as yf
 from volatility_Garch_demo import calculate_GARCH_volatility
 from historical_volatility import calculate_historical_volatility
+#from ticker import symbol
 from datetime import date, datetime
 import time
 import matplotlib.pyplot as plt
@@ -31,9 +32,12 @@ risk_free = yf.Ticker('^TNX').history(period='7d')['Close'].iloc[-1]/100 #risk f
 garch_volatility  = calculate_GARCH_volatility(symbol)/100 #pass the symbol and calls the volatility function from GARCH
 historical_volatility = calculate_historical_volatility(symbol)/100 #pass the symbol and calls the historical volatility function
 
+#counter
+
 
 
 #----------------------------black-scholes-function---------------------------------------
+
 def black_scholes(S, K, T, r, sigma, option_type = ''):
     d1 = (np.log(S / K) + (r + 0.5 * sigma ** 2) * T) / (sigma * np.sqrt(T))
     d2 = d1 - sigma * np.sqrt(T)
@@ -42,17 +46,19 @@ def black_scholes(S, K, T, r, sigma, option_type = ''):
         option_price = S * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2)
         delta = norm.cdf(d1)
         gamma = norm.pdf(d1)/(S*sigma*np.sqrt(T))
-        theta = (-S*norm.pdf(d1)*sigma/ (2*np.sqrt(T))) - r*K*np.exp(-r*T) * norm.cdf(d2)
+        theta = (-S*norm.pdf(d1)*sigma/ (2*np.sqrt(T))) + r*K*np.exp(-r*T) * norm.cdf(d2)
         vega = S*np.sqrt(T)*norm.pdf(d1)
         rho = K*T*np.exp(-r*T) * norm.cdf(d2)
 
+
     elif option_type == 'put':
         option_price = K * np.exp(-r * T) * norm.cdf(-d2) - S * norm.cdf(-d1)
-        delta = norm.cdf(d1)
+        delta = -norm.cdf(-d1)
         gamma = norm.pdf(d1)/(S*sigma*np.sqrt(T))
         theta = (-S*norm.pdf(d1)*sigma/ (2*np.sqrt(T))) - r*K*np.exp(-r*T) * norm.cdf(d2)
         vega = S*np.sqrt(T)*norm.pdf(d1)
-        rho = K*T*np.exp(-r*T) * norm.cdf(d2)
+        rho = -(K*T*np.exp(-r*T) * norm.cdf(d2))
+
 
     else:
         raise ValueError("Invalid option type. Use 'call' or 'put'.")
@@ -152,6 +158,7 @@ for index, row in option_data.iterrows():
 
 user_input = input("Do you want to plot the Greeks? (yes/no): ").lower()
 
+
 if user_input == 'yes':
     
     theoretical_prices = []
@@ -227,3 +234,5 @@ elif user_input == 'no':
     print("Exiting without plotting.")
 else:
     print("Invalid input. Please enter 'yes' or 'no'.")
+
+#---------------------------------------------------------------------------------------------------------------------------------------------------------
