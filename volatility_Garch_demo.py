@@ -6,7 +6,7 @@ import arch
 import math
 
 
-
+#recommended to transform data to log as black scholes assumes log transformed
 
 
 def calculate_GARCH_volatility(symbol):
