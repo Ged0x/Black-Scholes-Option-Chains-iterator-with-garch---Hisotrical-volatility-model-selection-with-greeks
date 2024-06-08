@@ -52,71 +52,28 @@ This Python repository offers a tool for option pricing utilizing the Black-Scho
 - Rho : Measures the sensitivity of the option price to changes in the risk-free interest rate (r)
 
 **Formulas**
-Sure, here are the Black-Scholes formulas for call and put options presented in a more mathematical format:
+def black_scholes(S, K, T, r, sigma, option_type = ''):
+    d1 = (np.log(S / K) + (r + 0.5 * sigma ** 2) * T) / (sigma * np.sqrt(T))
+    d2 = d1 - sigma * np.sqrt(T)
+    
+    if option_type == 'call':
+        option_price = S * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2)
+        delta = norm.cdf(d1)
+        gamma = norm.pdf(d1)/(S*sigma*np.sqrt(T))
+        theta = (-(S*norm.pdf(d1)*sigma)/ (2*np.sqrt(T))) + r*K*np.exp(-r*T) * norm.cdf(d2)
+        vega = S*np.sqrt(T)*norm.pdf(d1)
+        rho = K*T*np.exp(-r*T) * norm.cdf(d2)
 
-### Call Option Formulas
 
-1. **Option Price (\(C\))**:
-   \[
-   C = S \cdot N(d1) - K \cdot e^{-rT} \cdot N(d2)
-   \]
+    elif option_type == 'put':
+        option_price = K * np.exp(-r * T) * norm.cdf(-d2) - S * norm.cdf(-d1)
+        delta = -norm.cdf(-d1)
+        gamma = norm.pdf(d1)/(S*sigma*np.sqrt(T))
+        theta = (-(S*norm.pdf(d1)*sigma)/ (2*np.sqrt(T))) - r*K*np.exp(-r*T) * norm.cdf(-d2)
+        vega = S*np.sqrt(T)*norm.pdf(d1)
+        rho = (-(K*T*np.exp(-r*T) * norm.cdf(-d2)))
 
-2. **Delta (\(\Delta_{\text{call}}\))**:
-   \[
-   \Delta_{\text{call}} = N(d1)
-   \]
 
-3. **Gamma (\(\Gamma\))**:
-   \[
-   \Gamma = \frac{N'(d1)}{S \cdot \sigma \cdot \sqrt{T}}
-   \]
-
-4. **Theta (\(\Theta_{\text{call}}\))**:
-   \[
-   \Theta_{\text{call}} = -\frac{S \cdot \sigma \cdot N'(d1)}{2\sqrt{T}} + r \cdot K \cdot e^{-rT} \cdot N(d2)
-   \]
-
-5. **Vega (\(\nu\))**:
-   \[
-   \nu = S \cdot \sqrt{T} \cdot N'(d1)
-   \]
-
-6. **Rho (\(\rho_{\text{call}}\))**:
-   \[
-   \rho_{\text{call}} = K \cdot T \cdot e^{-rT} \cdot N(d2)
-   \]
-
-### Put Option Formulas
-
-1. **Option Price (\(P\))**:
-   \[
-   P = K \cdot e^{-rT} \cdot N(-d2) - S \cdot N(-d1)
-   \]
-
-2. **Delta (\(\Delta_{\text{put}}\))**:
-   \[
-   \Delta_{\text{put}} = -N(-d1)
-   \]
-
-3. **Gamma (\(\Gamma\))**:
-   \[
-   \Gamma = \frac{N'(d1)}{S \cdot \sigma \cdot \sqrt{T}}
-   \]
-
-4. **Theta (\(\Theta_{\text{put}}\))**:
-   \[
-   \Theta_{\text{put}} = -\frac{S \cdot \sigma \cdot N'(d1)}{2\sqrt{T}} - r \cdot K \cdot e^{-rT} \cdot N(-d2)
-   \]
-
-5. **Vega (\(\nu\))**:
-   \[
-   \nu = S \cdot \sqrt{T} \cdot N'(d1)
-   \]
-
-6. **Rho (\(\rho_{\text{put}}\))**:
-   \[
-   \rho_{\text{put}} = -K \cdot T \cdot e^{-rT} \cdot N(-d2)
-   \]
 
 Where:
 - \( S \) = Current stock price
