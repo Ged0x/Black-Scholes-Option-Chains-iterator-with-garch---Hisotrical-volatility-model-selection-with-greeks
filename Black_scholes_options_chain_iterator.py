@@ -3,11 +3,15 @@ from scipy.stats import norm
 import yfinance as yf
 from volatility_Garch_demo import calculate_GARCH_volatility
 from historical_volatility import calculate_historical_volatility
+import pandas as pd
 #from ticker import symbol
 from datetime import date, datetime
 import time
 import matplotlib.pyplot as plt
 import mplcursors
+
+
+#todo show risk free rate
 
 #|-----------------------------ASSUMPTIONS--------------------------------------|
 #| Certain assumptions are made by the Black-Scholes model:                     |
@@ -46,7 +50,7 @@ def black_scholes(S, K, T, r, sigma, option_type = ''):
         option_price = S * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2)
         delta = norm.cdf(d1)
         gamma = norm.pdf(d1)/(S*sigma*np.sqrt(T))
-        theta = (-S*norm.pdf(d1)*sigma/ (2*np.sqrt(T))) + r*K*np.exp(-r*T) * norm.cdf(d2)
+        theta = (-(S*norm.pdf(d1)*sigma)/ (2*np.sqrt(T))) + r*K*np.exp(-r*T) * norm.cdf(d2)
         vega = S*np.sqrt(T)*norm.pdf(d1)
         rho = K*T*np.exp(-r*T) * norm.cdf(d2)
 
@@ -55,9 +59,9 @@ def black_scholes(S, K, T, r, sigma, option_type = ''):
         option_price = K * np.exp(-r * T) * norm.cdf(-d2) - S * norm.cdf(-d1)
         delta = -norm.cdf(-d1)
         gamma = norm.pdf(d1)/(S*sigma*np.sqrt(T))
-        theta = (-S*norm.pdf(d1)*sigma/ (2*np.sqrt(T))) - r*K*np.exp(-r*T) * norm.cdf(d2)
+        theta = (-(S*norm.pdf(d1)*sigma)/ (2*np.sqrt(T))) - r*K*np.exp(-r*T) * norm.cdf(-d2)
         vega = S*np.sqrt(T)*norm.pdf(d1)
-        rho = -(K*T*np.exp(-r*T) * norm.cdf(d2))
+        rho = (-(K*T*np.exp(-r*T) * norm.cdf(-d2)))
 
 
     else:
@@ -149,7 +153,7 @@ for index, row in option_data.iterrows():
 
     option_price, delta, gamma, theta, vega, rho = black_scholes(asset.history(period="1d").iloc[-1]['Close'], row['strike'], selected_index + t, risk_free, volatility_model, option_type)
     print(f"\033[92mTheoretical price for {option_type} option {BLUE}{row['contractSymbol']}{RESET} {GREEN}with strike \033[35m{row['strike']}{RESET}: {option_price:.2f}\033[0m (In The Money:{RESET} {BLUE if row['inTheMoney'] else RED}{row['inTheMoney']}{RESET})")
-    print(f"Delta: {delta:.2f}, Gamma: {gamma:.2f}, Theta: {theta:.2f}, Vega: {vega:.2f}, Rho: {rho:.2f}")
+    print(f"Delta: {delta:.2f}, Gamma: {gamma:.2f}, Theta: {theta:.2f}, Vega: {vega:.2f}, Rho: {rho:.2f}, T = {t}")
     print("-----------------------------------------------------------------------------------------------------------")
 
 
@@ -234,5 +238,7 @@ elif user_input == 'no':
     print("Exiting without plotting.")
 else:
     print("Invalid input. Please enter 'yes' or 'no'.")
+
+
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------
