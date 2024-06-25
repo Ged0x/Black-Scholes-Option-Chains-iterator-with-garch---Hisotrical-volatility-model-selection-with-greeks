@@ -13,18 +13,6 @@ import mplcursors
 
 #todo show risk free rate
 
-#|-----------------------------ASSUMPTIONS--------------------------------------|
-#| Certain assumptions are made by the Black-Scholes model:                     |
-#| The Black-Scholes model is exclusively used to price European options        |
-#| and does not account for the possibility                                     |
-#| of exercising U.S. options before the expiration date.                       |
-#| During the option’s life, no dividends are paid.                             |
-#| Markets are unpredictable (i.e., market movements cannot be predicted).      |
-#| Purchasing the option has no transaction fees.                               |
-#| The underlying asset’s risk-free rate and volatility are known and constant. |
-#| The underlying asset’s returns are log-normally distributed.                 |
-#| The option is European and can only be exercised at expiration.              |
-#|------------------------------------------------------------------------------|
 
 #prompt ticker
 symbol = input("Enter Ticker : ")
@@ -86,13 +74,15 @@ options_chain = asset.option_chain(selected_date)
 option_type = input("Enter 'call' or 'put' to view the corresponding options chain: ")
 
 # Display the selected options chain based on the user's choice
-if option_type.lower() == 'call' or 'CALL':
+# Display the selected options chain based on the user's choice
+if option_type.lower() == 'call':
     option_data = options_chain.calls
-elif option_type.lower() == 'put' or 'PUT':
+elif option_type.lower() == 'put':
     option_data = options_chain.puts
 else:
     print("Invalid option type. Please enter 'call' or 'put'.")
     exit()
+
 
 print("\nSelected options chain:")
 print(option_data)
