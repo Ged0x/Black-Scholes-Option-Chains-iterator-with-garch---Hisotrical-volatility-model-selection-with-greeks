@@ -1,0 +1,3 @@
+update 1: fixed issues with plotting
+update 2: fixed calculations for put calls d1 and d2
+update 3: fixed error for showing only call options due to logic error
