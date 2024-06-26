@@ -1,3 +1,7 @@
 update 1: fixed issues with plotting
 update 2: fixed calculations for put calls d1 and d2
 update 3: fixed error for showing only call options due to logic error
+update 4: accounted leap year by calculating 365.25 instead of 365
+          fixed parameters correctly passing into the black scholes function
+          stock price is fetched once instead of iterating continously
+          fixed incorrect computation passing for d1 and d2 after update 3
