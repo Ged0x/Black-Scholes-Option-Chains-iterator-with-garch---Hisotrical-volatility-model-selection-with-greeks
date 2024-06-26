@@ -4,61 +4,55 @@ import yfinance as yf
 from volatility_Garch_demo import calculate_GARCH_volatility
 from historical_volatility import calculate_historical_volatility
 import pandas as pd
-#from ticker import symbol
 from datetime import date, datetime
 import time
 import matplotlib.pyplot as plt
 import mplcursors
 
 
-#todo show risk free rate
+# colors
+GREEN = '\033[92m'
+RED = '\033[91m'
+BLUE = '\033[94m'
+RESET = '\033[0m'
 
-
-#prompt ticker
-symbol = input("Enter Ticker : ")
+# ticker symbol
+symbol = input("Enter Ticker: ")
 asset = yf.Ticker(symbol)
 
-#initializing variables and parameters
+# variables and parameters
 today_date = date.today()
-risk_free = yf.Ticker('^TNX').history(period='7d')['Close'].iloc[-1]/100 #risk free bond 10 year yield
-garch_volatility  = calculate_GARCH_volatility(symbol)/100 #pass the symbol and calls the volatility function from GARCH
-historical_volatility = calculate_historical_volatility(symbol)/100 #pass the symbol and calls the historical volatility function
+risk_free = yf.Ticker('^TNX').history(period='7d')['Close'].iloc[-1] / 100  # risk-free bond 10-year yield
+garch_volatility = calculate_GARCH_volatility(symbol) / 100  # GARCH volatility
+historical_volatility = calculate_historical_volatility(symbol) / 100  # Historical volatility
 
-#counter
-
-
-
-#----------------------------black-scholes-function---------------------------------------
-
-def black_scholes(S, K, T, r, sigma, option_type = ''):
+# Black-Scholes function
+def black_scholes(S, K, T, r, sigma, option_type=''):
     d1 = (np.log(S / K) + (r + 0.5 * sigma ** 2) * T) / (sigma * np.sqrt(T))
     d2 = d1 - sigma * np.sqrt(T)
-    
+    print(f"d1 = {d1}")
+    print(f"d2 = {d2}")
+
     if option_type == 'call':
         option_price = S * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2)
         delta = norm.cdf(d1)
-        gamma = norm.pdf(d1)/(S*sigma*np.sqrt(T))
-        theta = (-(S*norm.pdf(d1)*sigma)/ (2*np.sqrt(T))) + r*K*np.exp(-r*T) * norm.cdf(d2)
-        vega = S*np.sqrt(T)*norm.pdf(d1)
-        rho = K*T*np.exp(-r*T) * norm.cdf(d2)
-
-
+        gamma = norm.pdf(d1) / (S * sigma * np.sqrt(T))
+        theta = (-(S * norm.pdf(d1) * sigma) / (2 * np.sqrt(T))) + r * K * np.exp(-r * T) * norm.cdf(d2)
+        vega = S * np.sqrt(T) * norm.pdf(d1)
+        rho = K * T * np.exp(-r * T) * norm.cdf(d2)
     elif option_type == 'put':
         option_price = K * np.exp(-r * T) * norm.cdf(-d2) - S * norm.cdf(-d1)
         delta = -norm.cdf(-d1)
-        gamma = norm.pdf(d1)/(S*sigma*np.sqrt(T))
-        theta = (-(S*norm.pdf(d1)*sigma)/ (2*np.sqrt(T))) - r*K*np.exp(-r*T) * norm.cdf(-d2)
-        vega = S*np.sqrt(T)*norm.pdf(d1)
-        rho = (-(K*T*np.exp(-r*T) * norm.cdf(-d2)))
-
-
+        gamma = norm.pdf(d1) / (S * sigma * np.sqrt(T))
+        theta = (-(S * norm.pdf(d1) * sigma) / (2 * np.sqrt(T))) - r * K * np.exp(-r * T) * norm.cdf(-d2)
+        vega = S * np.sqrt(T) * norm.pdf(d1)
+        rho = -(K * T * np.exp(-r * T) * norm.cdf(-d2))
     else:
         raise ValueError("Invalid option type. Use 'call' or 'put'.")
     
     return option_price, delta, gamma, theta, vega, rho
-#-----------------------------------------------------------------------------------------
 
-
+# option expiration dates
 expiration_dates = asset.options
 
 print("Available expiration dates for options:")
@@ -70,91 +64,67 @@ selected_date = expiration_dates[selected_index]
 
 options_chain = asset.option_chain(selected_date)
 
-# Prompt the user to choose between call and put options
-option_type = input("Enter 'call' or 'put' to view the corresponding options chain: ")
-
-# Display the selected options chain based on the user's choice
-# Display the selected options chain based on the user's choice
-if option_type.lower() == 'call':
-    option_data = options_chain.calls
-elif option_type.lower() == 'put':
-    option_data = options_chain.puts
-else:
+# prompt to choose between call and put options
+option_type = input("Enter 'call' or 'put' to view the corresponding options chain: ").lower()
+if option_type not in ['call', 'put']:
     print("Invalid option type. Please enter 'call' or 'put'.")
     exit()
 
+option_data = options_chain.calls if option_type == 'call' else options_chain.puts
 
 print("\nSelected options chain:")
 print(option_data)
 
-#color
-GREEN = '\033[92m'
-RESET = '\033[0m'
+# calculate time to expiration (T)
+selected_date = datetime.strptime(expiration_dates[selected_index], "%Y-%m-%d").date()
+T = (selected_date - today_date).days / 365.25  # Time left until maturity in years
 
-RED = '\033[91m'
-RESET = '\033[0m'
-
-BLUE = '\033[94m'
-RESET = '\033[0m'
-
-#time
-selected_date_str = expiration_dates[selected_index]
-selected_date = datetime.strptime(selected_date_str, "%Y-%m-%d").date()
-t = (selected_date - today_date).days / 365 #time left until maturity in days
-
-
-#volatility model selection for sigma-----------------------------------------------------------------------
-selected_volatility_model = input("Enter 'garch' or 'historical' to select the sigma for black scholes: ")
-if selected_volatility_model.lower() == 'garch':
+# volatility model selection for sigma
+selected_volatility_model = input("Enter 'garch' or 'historical' to select the sigma for Black-Scholes: ").lower()
+if selected_volatility_model == 'garch':
     volatility_model = garch_volatility
-elif selected_volatility_model.lower() == 'historical':
+elif selected_volatility_model == 'historical':
     volatility_model = historical_volatility
 else:
     print("Invalid option type. Please enter 'garch' or 'historical'.")
     exit()
-print(f"\n----------------------------------------------------------------\033[0m")
-print(f"{RED}VOLATILITY_MODEL_SELECTED{RESET} : {GREEN}{volatility_model}{RESET}")
-print(f"\n----------------------------------------------------------------\033[0m")
 
+print(f"\n----------------------------------------------------------------")
+print(f"{RED}VOLATILITY_MODEL_SELECTED{RESET} : {GREEN}{volatility_model}{RESET}")
+print(f"\n----------------------------------------------------------------")
+
+# loading animation char
 loading_chars = "|/-\\"
-for i in range(20):  # Print the loading animation 20 times
+for i in range(20):
     print(f"\rLoading {loading_chars[i % len(loading_chars)]}", end='', flush=True)
-    time.sleep(0.1)  # Adjust sleep duration
+    time.sleep(0.1)
 print("\nLoading complete.")
-#-----------------------------------------------------------------------------------------------------------
-#parameter check debugger
+
+# parameters
+stock_price = asset.history(period="1d").iloc[-1]['Close']
 print(f"{BLUE}-----------P-A-R-A-M-E-T-E-R-S-----------{RESET}")
-print("                          ")
-print(f"t{BLUE} = {RESET}{t}")
+print(f"t{BLUE} = {RESET}{T}")
 print(f"sigma{BLUE} = {RESET}{volatility_model}")
 print(f"r{BLUE} = {RESET}{risk_free}")
-print(f"S{BLUE} = {RESET}{asset.history(period='1d').iloc[-1]['Close']}")
-print("                          ")
+print(f"S{BLUE} = {RESET}{stock_price}")
 print(f"{BLUE}-----------------------------------------{RESET}")
 
-loading_chars = "|/-\\"
-for i in range(20):  # Print the loading animation 20 times
-    print(f"\rLoading {loading_chars[i % len(loading_chars)]}", end='', flush=True)
-    time.sleep(0.1)  # Adjust sleep duration
-print("\nLoading complete.")
-
-# loop calculate theoretical prices using Black-Scholes model------------------------------------------------
+# loop calculate theoretical prices with bs model
 for index, row in option_data.iterrows():
-
-    option_price, delta, gamma, theta, vega, rho = black_scholes(asset.history(period="1d").iloc[-1]['Close'], row['strike'], selected_index + t, risk_free, volatility_model, option_type)
+    option_price, delta, gamma, theta, vega, rho = black_scholes(stock_price, row['strike'], T, risk_free, volatility_model, option_type)
     print(f"\033[92mTheoretical price for {option_type} option {BLUE}{row['contractSymbol']}{RESET} {GREEN}with strike \033[35m{row['strike']}{RESET}: {option_price:.2f}\033[0m (In The Money:{RESET} {BLUE if row['inTheMoney'] else RED}{row['inTheMoney']}{RESET})")
-    print(f"Delta: {delta:.2f}, Gamma: {gamma:.2f}, Theta: {theta:.2f}, Vega: {vega:.2f}, Rho: {rho:.2f}, T = {t}")
+    print(f"Delta: {delta:.2f}, Gamma: {gamma:.2f}, Theta: {theta:.2f}, Vega: {vega:.2f}, Rho: {rho:.2f}, T = {T}")
+    print(f"Stock Price {symbol} = {stock_price}")
+    print(f"Risk Free = {risk_free}")
+    #print("---------------DEBUGGER--------------")
+    print(f"Strike Price = {row['strike']}")
+    print(f"Volatility = {volatility_model}")
+    print(f"Option Type = {option_type}")
     print("-----------------------------------------------------------------------------------------------------------")
 
-
-
-#----------------------------------------------GREEKS-GRAPH---------------------------------------------------------------------------------
-
+# plot Greeks
 user_input = input("Do you want to plot the Greeks? (yes/no): ").lower()
-
-
 if user_input == 'yes':
-    
     theoretical_prices = []
     deltas = []
     gammas = []
@@ -163,7 +133,7 @@ if user_input == 'yes':
     rhos = []
 
     for index, row in option_data.iterrows():
-        option_price, delta, gamma, theta, vega, rho = black_scholes(asset.history(period="1d").iloc[-1]['Close'], row['strike'], selected_index + t, risk_free, volatility_model, option_type)
+        option_price, delta, gamma, theta, vega, rho = black_scholes(stock_price, row['strike'], T, risk_free, volatility_model, option_type)
         theoretical_prices.append(option_price)
         deltas.append(delta)
         gammas.append(gamma)
@@ -173,7 +143,7 @@ if user_input == 'yes':
 
         print(f"Plotting {option_type} option {row['contractSymbol']} with strike {row['strike']}: {option_price:.2f} (In The Money: {'Yes' if row['inTheMoney'] else 'No'})")
 
-    # Plotting the Greeks
+    # greeks plotting
     strikes = option_data['strike']
 
     fig, axes = plt.subplots(3, 2, figsize=(12, 10))
@@ -220,7 +190,7 @@ if user_input == 'yes':
 
     plt.tight_layout()
 
-    # Add cursor annotations
+    # cursor annotations
     mplcursors.cursor(hover=True)
 
     plt.show()
