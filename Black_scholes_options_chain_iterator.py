@@ -9,7 +9,6 @@ import time
 import matplotlib.pyplot as plt
 import mplcursors
 
-
 # colors
 GREEN = '\033[92m'
 RED = '\033[91m'
@@ -37,14 +36,14 @@ def black_scholes(S, K, T, r, sigma, option_type=''):
         option_price = S * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2)
         delta = norm.cdf(d1)
         gamma = norm.pdf(d1) / (S * sigma * np.sqrt(T))
-        theta = (-(S * norm.pdf(d1) * sigma) / (2 * np.sqrt(T))) + r * K * np.exp(-r * T) * norm.cdf(d2)
+        theta = (-(S * norm.pdf(d1) * sigma) / (2 * np.sqrt(T))) + r * (K * (np.exp(-r * T)) * norm.cdf(d2))
         vega = S * np.sqrt(T) * norm.pdf(d1)
         rho = K * T * np.exp(-r * T) * norm.cdf(d2)
     elif option_type == 'put':
         option_price = K * np.exp(-r * T) * norm.cdf(-d2) - S * norm.cdf(-d1)
         delta = -norm.cdf(-d1)
         gamma = norm.pdf(d1) / (S * sigma * np.sqrt(T))
-        theta = (-(S * norm.pdf(d1) * sigma) / (2 * np.sqrt(T))) - r * K * np.exp(-r * T) * norm.cdf(-d2)
+        theta = (-(S * norm.pdf(d1) * sigma) / (2 * np.sqrt(T))) - r * (K * (np.exp(-r * T)) * norm.cdf(-d2))
         vega = S * np.sqrt(T) * norm.pdf(d1)
         rho = -(K * T * np.exp(-r * T) * norm.cdf(-d2))
     else:
@@ -79,12 +78,17 @@ print(option_data)
 selected_date = datetime.strptime(expiration_dates[selected_index], "%Y-%m-%d").date()
 T = (selected_date - today_date).days / 365.25  # Time left until maturity in years
 
+
+
 # volatility model selection for sigma
-selected_volatility_model = input("Enter 'garch' or 'historical' to select the sigma for Black-Scholes: ").lower()
+selected_volatility_model = input("Enter 'garch' or 'historical' or 'input' to select the sigma for Black-Scholes: ").lower()
 if selected_volatility_model == 'garch':
     volatility_model = garch_volatility
 elif selected_volatility_model == 'historical':
     volatility_model = historical_volatility
+elif selected_volatility_model == 'input':
+    volatility_model = input("Enter your own volatility input : ")
+    volatility_model = int(volatility_model)
 else:
     print("Invalid option type. Please enter 'garch' or 'historical'.")
     exit()
@@ -113,13 +117,15 @@ print(f"{BLUE}-----------------------------------------{RESET}")
 for index, row in option_data.iterrows():
     option_price, delta, gamma, theta, vega, rho = black_scholes(stock_price, row['strike'], T, risk_free, volatility_model, option_type)
     print(f"\033[92mTheoretical price for {option_type} option {BLUE}{row['contractSymbol']}{RESET} {GREEN}with strike \033[35m{row['strike']}{RESET}: {option_price:.2f}\033[0m (In The Money:{RESET} {BLUE if row['inTheMoney'] else RED}{row['inTheMoney']}{RESET})")
-    print(f"Delta: {delta:.2f}, Gamma: {gamma:.2f}, Theta: {theta:.2f}, Vega: {vega:.2f}, Rho: {rho:.2f}, T = {T}")
+    print(f"Delta: {delta:.2f}, Gamma: {gamma:.2f}, Theta: {theta:.2f}, Vega: {vega:.2f}, Rho: {rho:.2f}, ")
     print(f"Stock Price {symbol} = {stock_price}")
     print(f"Risk Free = {risk_free}")
     #print("---------------DEBUGGER--------------")
     print(f"Strike Price = {row['strike']}")
     print(f"Volatility = {volatility_model}")
     print(f"Option Type = {option_type}")
+    print(f"T = {T}")
+    print(f"Option Elasticity = {(delta / option_price) * stock_price}")
     print("-----------------------------------------------------------------------------------------------------------")
 
 # plot Greeks
@@ -198,6 +204,13 @@ elif user_input == 'no':
     print("Exiting without plotting.")
 else:
     print("Invalid input. Please enter 'yes' or 'no'.")
+
+
+
+
+
+
+
 
 
 
